@@ -1,4 +1,4 @@
-package appEvent;
+package pl.krzyszczak.mikolaj.serverchat.appEvent;
 
 import java.io.Serializable;
 

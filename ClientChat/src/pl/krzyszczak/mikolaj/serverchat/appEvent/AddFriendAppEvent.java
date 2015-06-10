@@ -1,8 +1,8 @@
-package appEvent;
+package pl.krzyszczak.mikolaj.serverchat.appEvent;
 
 import java.io.Serializable;
 
-import helpfull.UserId;
+import pl.krzyszczak.mikolaj.serverchat.helpfull.UserId;
 
 public class AddFriendAppEvent extends ApplicationEvent implements Serializable {
 
