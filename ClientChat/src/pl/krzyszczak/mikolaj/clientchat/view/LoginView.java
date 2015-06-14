@@ -18,6 +18,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
+import pl.krzyszczak.mikolaj.clientchat.appEvent.SendToServerEvent;
 import pl.krzyszczak.mikolaj.serverchat.appEvent.ApplicationEvent;
 import pl.krzyszczak.mikolaj.serverchat.appEvent.CreateAccountAppClientEvent;
 import pl.krzyszczak.mikolaj.serverchat.appEvent.LoginAppClientEvent;
@@ -129,10 +130,13 @@ public class LoginView
 					try{
 					int id = Integer.parseInt(toNumber);
 					System.out.println(toNumber + id);
-					int hashPwd = (String.valueOf(passwordLoginTextField))
-							.hashCode();
-					eventQueue.offer(new LoginAppClientEvent(new UserId(id),
-							new UserPassword(hashPwd)));
+					int hashPwd = (String
+							.valueOf(passwordLoginTextField
+									.getPassword())).hashCode();
+					/** TODO*/
+					System.out.println(hashPwd);
+					eventQueue.offer(new SendToServerEvent(new LoginAppClientEvent(new UserId(id),
+							new UserPassword(hashPwd))));
 					}
 					catch(NumberFormatException ex)
 					{
@@ -163,11 +167,12 @@ public class LoginView
 					int hashPwd = (String
 							.valueOf(passwordCreateAccountTextField
 									.getPassword())).hashCode();
+					/** TODO*/
 					System.out.println(hashPwd);
 					if (hashPwd == 0)
 						displayInfoMessage("Podaj haslo");
-					eventQueue.offer(new CreateAccountAppClientEvent(name,
-							new UserPassword(hashPwd)));
+					eventQueue.offer(new SendToServerEvent( new CreateAccountAppClientEvent(name,
+							new UserPassword(hashPwd))));
 
 				}
 			}
@@ -234,5 +239,23 @@ public class LoginView
 			}
 		});
 	}
+	
+	/**
+	 * Niszczenie okna logowania - potrzebne jest tylko raz na poczatku
+	 * rozgrywki
+	 */
+	public void disposeLoginView()
+	{
+		SwingUtilities.invokeLater(new Runnable()
+		{
 
+			@Override
+			public void run()
+			{
+				frame.setVisible(false);
+				frame.dispose();
+			}
+
+		});
+	}
 }

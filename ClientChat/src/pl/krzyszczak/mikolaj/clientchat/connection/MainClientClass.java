@@ -8,8 +8,11 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.BlockingQueue;
 
+import pl.krzyszczak.mikolaj.clientchat.appEvent.NewDummyEvent;
 import pl.krzyszczak.mikolaj.serverchat.appEvent.ApplicationEvent;
 import pl.krzyszczak.mikolaj.serverchat.helpfull.UserId;
+import pl.krzyszczak.mikolaj.serverchat.sendDummy.SendDummy;
+import pl.krzyszczak.mikolaj.serverchat.sendDummy.SendUserContactsDummy;
 
 /**
  * G³ówna klasa aplikacji klienta, s³u¿y do komunikacji z serwerem, wysy³aniem
@@ -65,17 +68,20 @@ public class MainClientClass
 			this.inStream = new ObjectInputStream(socket.getInputStream());
 			this.outStream = new ObjectOutputStream(socket.getOutputStream());
 
-			this.sendEvent();
 			ServerListener serverListener = new ServerListener();
 			serverListener.start();
-
-			this.sendEvent();
 
 		} catch (IOException e)
 		{
 			System.exit(1);
 		}
 
+	}
+
+	/** Metoda zwracaj¹ca wartoœæ UserId */
+	public UserId getUserId()
+	{
+		return userId;
 	}
 
 	/**
@@ -89,25 +95,15 @@ public class MainClientClass
 	/**
 	 * Metoda wysy³aj¹ca wiadomoœæ o evencie do serwera
 	 */
-	public void sendEvent()
+	public void sendEvent(ApplicationEvent applicationEvent)
 	{
-		while (true)
+
+		try
 		{
-			try
-			{
-				ApplicationEvent applicationEvent = eventQueue.take();
-
-				try
-				{
-					outStream.writeObject(applicationEvent);
-				} catch (IOException e)
-				{
-					System.exit(1);
-				}
-			} catch (InterruptedException e)
-			{
-
-			}
+			outStream.writeObject(applicationEvent);
+		} catch (IOException e)
+		{
+			System.exit(1);
 		}
 
 	}
@@ -122,8 +118,8 @@ public class MainClientClass
 	}
 
 	/**
-	 * Klasa nas³uchuj¹ca po³aczeñ od serwera TODO obs³ugê widoki na podstawie
-	 * otrzymanej makiety
+	 * Klasa nas³uchuj¹ca po³aczeñ od serwera obs³ugê widoki na podstawie
+	 * otrzymanej makiety TODO to jest Ÿle~!!
 	 */
 	public class ServerListener extends Thread
 	{
@@ -135,12 +131,14 @@ public class MainClientClass
 			{
 				try
 				{
-					ApplicationEvent applicationEvent = (ApplicationEvent) inStream
-							.readObject();
-					eventQueue.add(applicationEvent);
+			
+					
+					SendDummy dummy = (SendDummy) inStream.readObject();
+					eventQueue.add(new NewDummyEvent(dummy));
 				} catch (IOException | ClassNotFoundException e)
 				{
 					e.printStackTrace();
+					System.exit(2);
 				}
 			}
 		}

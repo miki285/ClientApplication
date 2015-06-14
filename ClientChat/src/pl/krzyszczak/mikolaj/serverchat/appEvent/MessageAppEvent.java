@@ -4,31 +4,40 @@ import java.io.Serializable;
 
 import pl.krzyszczak.mikolaj.serverchat.helpfull.UserId;
 
-public class MessageAppEvent extends ApplicationEvent implements Serializable {
+public class MessageAppEvent extends ApplicationEvent implements Serializable
+{
 	/**
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	private final UserId byUser;
-	private final UserId toUser;
+	private UserId byUserId;
+	private final UserId toUserId;
 	private final String msg;
-	
-	public MessageAppEvent(final UserId byUser, final UserId toUser, final String msg){
-		this.byUser=byUser;
-		this.toUser=toUser;
-		this.msg=msg;
+
+	public MessageAppEvent( final UserId toUserId,
+			final String msg)
+	{
+		this.toUserId = toUserId;
+		this.msg = msg;
 	}
-	
+
+	/** Metoda ustawiaj¹ca byUserId */
+
+	public void setByUserId(UserId byUserId)
+	{
+		this.byUserId = byUserId;
+	}
+
 	public UserId getByUser()
 	{
-		return this.byUser;
+		return this.byUserId;
 	}
-	
+
 	public UserId getToUser()
 	{
-		return this.toUser;
+		return this.toUserId;
 	}
-	
+
 	public String getMsg()
 	{
 		return this.msg;

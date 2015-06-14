@@ -3,6 +3,7 @@ package pl.krzyszczak.mikolaj.serverchat.sendDummy;
 import java.io.Serializable;
 import java.util.HashSet;
 
+import pl.krzyszczak.mikolaj.serverchat.helpfull.UserId;
 import pl.krzyszczak.mikolaj.serverchat.helpfull.UsersDataForClient;
 
 /**
@@ -18,20 +19,19 @@ public class SendUserContactsDummy extends SendDummy implements Serializable
 	 * 
 	 */
 	private static final long serialVersionUID = 1L;
-	/**
-	 * HashSet zawieraj¹cy u¿ytkowników
-	 */
 	private HashSet<UsersDataForClient> usersFriends;
 	private HashSet<UsersDataForClient> allUsers;
+	private UserId byUserId;
 
 	/**
 	 * Konstruktor tworz¹cy makietê
 	 */
 	public SendUserContactsDummy(HashSet<UsersDataForClient> usersFriends,
-			HashSet<UsersDataForClient> allUsers)
+			HashSet<UsersDataForClient> allUsers,UserId byUserId)
 	{
 		this.usersFriends = usersFriends;
 		this.allUsers = allUsers;
+		this.byUserId=byUserId;
 	}
 
 	/**
@@ -55,4 +55,13 @@ public class SendUserContactsDummy extends SendDummy implements Serializable
 		return this.allUsers;
 	}
 
+	/**
+	 * Metoda zwracaj¹ca UserId u¿ytkownika przez którego ta makieta powsta³a
+	 * 
+	 * @return
+	 */
+	public UserId getByUserId()
+	{
+		return this.byUserId;
+	}	
 }
