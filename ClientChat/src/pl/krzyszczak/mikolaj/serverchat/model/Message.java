@@ -1,4 +1,4 @@
-package pl.krzyszczak.mikolaj.serverchat.helpfull;
+package pl.krzyszczak.mikolaj.serverchat.model;
 
 import java.io.Serializable;
 import java.util.Date;

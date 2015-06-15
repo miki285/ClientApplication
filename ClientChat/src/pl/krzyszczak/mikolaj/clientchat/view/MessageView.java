@@ -3,6 +3,15 @@
  */
 package pl.krzyszczak.mikolaj.clientchat.view;
 
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.concurrent.BlockingQueue;
 
 import javax.swing.JButton;
@@ -14,8 +23,12 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
+import pl.krzyszczak.mikolaj.clientchat.appEvent.CloseMessageWindowEvent;
+import pl.krzyszczak.mikolaj.clientchat.appEvent.SendToServerEvent;
 import pl.krzyszczak.mikolaj.serverchat.appEvent.ApplicationEvent;
+import pl.krzyszczak.mikolaj.serverchat.appEvent.MessageAppEvent;
 import pl.krzyszczak.mikolaj.serverchat.helpfull.UserId;
+import pl.krzyszczak.mikolaj.serverchat.model.Message;
 import pl.krzyszczak.mikolaj.serverchat.sendDummy.SendMessageDummy;
 
 /**
@@ -53,7 +66,7 @@ public class MessageView
 		this.friendsUserId = friendsUserId;
 		System.out.println(this.friendsUserId.getId());
 		initialize();
-		//frame.setVisible(true);
+		frame.setVisible(true);
 
 	}
 
@@ -87,7 +100,30 @@ public class MessageView
 
 		sendButton = new JButton("Wyœlij");
 		sendButton.setBounds(465, 400, 100, 30);
+		sendButton.addActionListener(new ActionListener()
+		{
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				eventQueue.offer(new SendToServerEvent(new MessageAppEvent(
+						friendsUserId, usersTextMessagefield.getText())));
+				usersTextMessagefield.setText("");
+			}
+		});
 
+		/** Przeci¹¿am klikniêcie zamkniêcia okna chatu */
+		WindowAdapter exitListener = new WindowAdapter()
+		{
+			@Override
+			public void windowClosing(WindowEvent e)
+			{
+				eventQueue.offer(new CloseMessageWindowEvent(friendsUserId));
+				frame.dispose();
+
+			}
+		};
+
+		frame.addWindowListener(exitListener);
 		frame.add(usersConversationScroll);
 		frame.add(usersTextMessageScroll);
 		frame.add(sendButton);
@@ -111,7 +147,7 @@ public class MessageView
 			}
 		});
 	}
-	
+
 	/**
 	 * Ustawia widoczno ekranu rozmowy
 	 * 
@@ -133,7 +169,7 @@ public class MessageView
 	/**
 	 * @param messageDummy
 	 */
-	public void setMessageDummy(SendMessageDummy messageDummy)
+	public void setMessageList(final ArrayList<Message> listOfMessages)
 	{
 
 		SwingUtilities.invokeLater(new Runnable()
@@ -142,7 +178,16 @@ public class MessageView
 			@Override
 			public void run()
 			{
-
+				DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+				String toPrint="";
+				Collections.sort(listOfMessages);
+				for(Message message: listOfMessages)
+				{
+					toPrint=toPrint+df.format(message.getDate()) + " U¿ykownik o id: " + message.getByUser().getId() + "\n" + message.getMessage();
+					System.out.println(toPrint);
+				}
+				usersConversation.setText("");
+				usersConversation.setText(toPrint);
 			}
 		});
 	}

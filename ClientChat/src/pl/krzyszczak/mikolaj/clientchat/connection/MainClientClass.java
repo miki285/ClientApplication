@@ -131,10 +131,8 @@ public class MainClientClass
 			{
 				try
 				{
-			
-					
 					SendDummy dummy = (SendDummy) inStream.readObject();
-					eventQueue.add(new NewDummyEvent(dummy));
+					eventQueue.offer(new NewDummyEvent(dummy));
 				} catch (IOException | ClassNotFoundException e)
 				{
 					e.printStackTrace();

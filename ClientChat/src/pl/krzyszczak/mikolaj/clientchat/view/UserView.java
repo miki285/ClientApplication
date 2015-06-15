@@ -29,6 +29,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
+import pl.krzyszczak.mikolaj.clientchat.appEvent.OpenMessageWindowEvent;
 import pl.krzyszczak.mikolaj.clientchat.appEvent.SendToServerEvent;
 import pl.krzyszczak.mikolaj.serverchat.appEvent.AddFriendAppEvent;
 import pl.krzyszczak.mikolaj.serverchat.appEvent.ApplicationEvent;
@@ -56,10 +57,6 @@ public class UserView
 	private DefaultListModel<UsersDataForClient> listFriendsModel;
 	/** Lista elementów do wyœwietlenia */
 	private DefaultListModel<UsersDataForClient> listAllUsersModel;
-	/** Przycisk dodania znajomego */
-	private JButton addFriendButton;
-	/** Przycisk wys³ania wiadomoœci */
-	private JButton sendMessageButton;
 	/**
 	 * Etykieta do opisuj¹ca pole JList zawieraj¹cych wszystkich u¿ytkowników na
 	 * serwerze
@@ -76,16 +73,18 @@ public class UserView
 	private JPanel usersFriendPanel;
 	/** Jscrolpannel do wszysktich uzytkownikow */
 	private JScrollPane usersPanelScroll;
-
 	/** Jscrolpannel do listy znajomych */
 	private JScrollPane friendsPanelScroll;
+	/**Mouse Listenery*/
+	private	MouseListener mouseUsersListener;
+	private MouseListener mouseFriendsListener;
 
-	public UserView(final BlockingQueue<ApplicationEvent> eventQueue)
+	public UserView(final BlockingQueue<ApplicationEvent> eventQueue, UserId userId)
 	{
 		this.eventQueue = eventQueue;
 
 		// Frame
-		frame = new JFrame("Okno kontaktow");
+		frame = new JFrame("Chat ID:" + userId.getId());
 		frame.setSize(330, 800);
 		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		frame.getContentPane().setLayout(null);
@@ -97,13 +96,6 @@ public class UserView
 		allUsersLabel = new JLabel("Wszyscy uzytkownicy :");
 		allUsersLabel.setBounds(15, 365, 150, 50);
 
-		// Buttons
-
-		sendMessageButton = new JButton("Wiadomosc");
-		sendMessageButton.setBounds(194, 355, 120, 25);
-
-		addFriendButton = new JButton("Dodaj");
-		addFriendButton.setBounds(234, 705, 80, 25);
 
 		/** @ TODO obs³ugê przyciwsków */
 
@@ -173,7 +165,7 @@ public class UserView
 		 * 
 		 * } });
 		 */
-		MouseListener mouseListener = new MouseAdapter()
+		mouseUsersListener = new MouseAdapter()
 		{
 			public void mouseClicked(MouseEvent e)
 			{
@@ -181,18 +173,28 @@ public class UserView
 				{
 					UsersDataForClient seleList = userList.getSelectedValue();
 					eventQueue.offer(new SendToServerEvent(new AddFriendAppEvent(seleList.getUserId())));
-					System.out.println(seleList);
 				}
 			}
 		};
-		userList.addMouseListener(mouseListener);
+		userList.addMouseListener(mouseUsersListener);
+		
+		mouseFriendsListener = new MouseAdapter()
+		{
+			public void mouseClicked(MouseEvent e)
+			{
+				if (e.getClickCount() == 2)
+				{
+					UsersDataForClient seleList = usersFriendList.getSelectedValue();
+					System.out.println("Dupa dupa dupa" + seleList.getUserId().getId());
+					eventQueue.offer(new OpenMessageWindowEvent(seleList.getUserId()));
+				}
+			}
+		};
+		usersFriendList.addMouseListener(mouseFriendsListener);
 
 		// frame.add(userList);
 		frame.add(usersFriendsLabel);
 		frame.add(allUsersLabel);
-
-		frame.add(sendMessageButton);
-		frame.add(addFriendButton);
 
 		frame.add(friendsPanelScroll);
 		frame.add(usersPanelScroll);
@@ -253,7 +255,9 @@ public class UserView
 			@Override
 			public void run()
 			{
-				if(allUsers.size()!=usersContacts.size())
+				allUsers.containsAll(usersContacts);
+				
+				//if(allUsers==usersContacts)
 				{
 					listFriendsModel = (DefaultListModel<UsersDataForClient>) usersFriendList
 							.getModel();

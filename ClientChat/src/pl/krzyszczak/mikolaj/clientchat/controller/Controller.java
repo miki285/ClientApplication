@@ -16,7 +16,6 @@ import pl.krzyszczak.mikolaj.clientchat.connection.MainClientClass;
 import pl.krzyszczak.mikolaj.clientchat.view.LoginView;
 import pl.krzyszczak.mikolaj.clientchat.view.MessageView;
 import pl.krzyszczak.mikolaj.clientchat.view.UserView;
-import pl.krzyszczak.mikolaj.serverchat.appEvent.AddFriendAppEvent;
 import pl.krzyszczak.mikolaj.serverchat.appEvent.ApplicationEvent;
 import pl.krzyszczak.mikolaj.serverchat.helpfull.UserId;
 import pl.krzyszczak.mikolaj.serverchat.sendDummy.SendDummy;
@@ -53,7 +52,7 @@ public class Controller
 		this.client = client;
 		messageViews = new HashMap<UserId, MessageView>();
 		loginView= new LoginView(eventQueue);
-		userView=new UserView(eventQueue);
+		
 
 		eventStrategyMap = new HashMap<Class<? extends ApplicationEvent>, Controller.ApplicationEventStrategy>();
 		eventStrategyMap.put(OpenMessageWindowEvent.class,
@@ -126,6 +125,7 @@ public class Controller
 				loginView.disposeLoginView();
 				String showMessage= new String ("Poprawne zalogowanie. Twój numer ID:" + client.getUserId().getId());
 				System.out.println(showMessage);
+				userView=new UserView(eventQueue, client.getUserId());
 				userView.setVisibleLobbyView(true);
 				userView.displayInfoMessage(showMessage);
 				loginView = null;
@@ -153,14 +153,27 @@ public class Controller
 	class MessageDummyStrategy extends ApplicationDummyStrategy
 	{
 
-		
+		/**TODO*/
 		@Override
 		void execute(SendDummy sendDummy)
 		{
 			SendMessageDummy messageDummy=((SendMessageDummy)sendDummy);
 			UserId withUserId=messageDummy.getToUserId();
-			MessageView messageView= messageViews.get(withUserId);
-			messageView.setMessageDummy(messageDummy);
+			MessageView messageView=null;
+			for(UserId userId: messageViews.keySet())
+			{
+				if(userId.equals(withUserId))
+					{
+					messageView= messageViews.get(userId);
+					break;					
+					}
+			}
+			if(messageView==null)
+			{
+				messageViews.put(withUserId, new MessageView(eventQueue, withUserId));
+				messageView=messageViews.get(withUserId);
+			}
+			messageView.setMessageList(messageDummy.getListOfMessages());
 			
 			
 		}
@@ -237,11 +250,13 @@ public class Controller
 		@Override
 		void execute(ApplicationEvent applicationEvent)
 		{
-			OpenMessageWindowEvent messageWindowEvent = ((OpenMessageWindowEvent) applicationEvent);
-			UserId toUserId = messageWindowEvent.getToUserId();
-			if (!messageViews.containsKey(toUserId))
-				messageViews.remove(toUserId);
-
+			CloseMessageWindowEvent messageWindowEvent = ((CloseMessageWindowEvent) applicationEvent);
+			UserId toUserId = messageWindowEvent.getUserId();
+			for(UserId userId: messageViews.keySet())
+			{
+				if(userId.equals(toUserId))
+					messageViews.remove(userId);
+			}
 		}
 
 	}

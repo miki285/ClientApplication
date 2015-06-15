@@ -4,7 +4,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 import pl.krzyszczak.mikolaj.serverchat.helpfull.UserId;
-import pl.krzyszczak.mikolaj.serverchat.helpfull.Message;
+import pl.krzyszczak.mikolaj.serverchat.model.Message;
 
 /**
  * klasa makiety do wysy³ania rozmowy
